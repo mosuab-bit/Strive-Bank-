@@ -1,0 +1,50 @@
+﻿# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.vscode/
+
+# Rider
+.idea/
+*.sln.iml
+
+# ASP.NET Core secrets
+secrets.json
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# HTTP files
+*.http
+
+# Publish output
+publish/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+
+# Migrations snapshot (if needed)
+*Migrations/*.Designer.cs
+*Migrations/*Snapshot.cs
+
+# Ignore appsettings files (for sensitive data)
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
