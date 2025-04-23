@@ -15,10 +15,10 @@ namespace BankSystem.API.Repositories.Service
 {
     public class AccountRepository(BankSystemDbContext context, UserManager<ApplicationUser> userManager
             , SignInManager<ApplicationUser> signInManager
-            , JWTService _jwtService, IEmail _Email
+            , IEmail _Email
             , IConfiguration configuration, IUrlHelperFactory urlHelperFactory
             , IHttpContextAccessor httpContextAccessor
-            , IUrlHelper urlHelper) : IAccountRepository
+            ) : IAccountRepository
     {
         //public async Task<Response_RegistrationDto> RegisterUserAsync(RegisterRequestDto registerDto)
         //{
@@ -91,6 +91,7 @@ namespace BankSystem.API.Repositories.Service
         //        Success = true,
         //    };
         //}
+
         public async Task<Response_RegistrationDto> RegisterUserAsync(RegisterRequestDto registerDto)
         {
             string bankName = "Strive Bank";
@@ -142,16 +143,13 @@ namespace BankSystem.API.Repositories.Service
             }
 
             // ✅ إرسال البريد الإلكتروني مع رابط التأكيد
-            await _Email.SendEmailAsync(registerDto.Email, "NovaBank", $"{bankName} - Confirm Your Email", emailHtmlContent);
+            await _Email.SendEmailAsync(registerDto.Email, "Strive Bank", $"{bankName} - Confirm Your Email", emailHtmlContent);
 
-            var accessToken = _jwtService.GenerateJwtToken(UserInfo);
 
             return new Response_RegistrationDto
             {
                 UserName = registerDto.UserName,
-                Success = true,
-                AccessToken = accessToken,  // ✅ تم إضافة التوكن في الرد
-                confirmLink = confirmationUrl // ✅ تم إرجاع رابط التأكيد
+                Success = true, 
             };
         }
 

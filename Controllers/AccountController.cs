@@ -1,5 +1,7 @@
 ﻿using BankSystem.API.Models.Domain;
 using BankSystem.API.Models.DTO;
+using BankSystem.API.Repositories.Interface;
+using BankSystem.API.Repositories.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +10,7 @@ namespace BankSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(UserManager<ApplicationUser> userManager) : ControllerBase
+    public class AccountController(UserManager<ApplicationUser> userManager,JWTServices jWTServices,IAccountRepository accountRepository) : ControllerBase
     {
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromForm] RegisterRequestDto registerRequest)
@@ -17,6 +19,20 @@ namespace BankSystem.API.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            var result = await accountRepository.RegisterUserAsync(registerRequest);
+
+            if (result.UserName == null)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(new
+            {
+                message = "Registration successful! , please check your email to Confirm Email ",
+                result.UserName,
+                result.Success,
+            });
         }
 
         [HttpGet("ConfirmEmail")]
@@ -34,7 +50,7 @@ namespace BankSystem.API.Controllers
                 return BadRequest("Email confirmation failed.");
 
             // ✅ بعد تأكيد البريد الإلكتروني، يتم توليد التوكن
-            var accessToken = _jwtService.GenerateJwtToken(user);
+            var accessToken = jWTServices.GenerateJwtToken(user);
 
             return Ok(new
             {

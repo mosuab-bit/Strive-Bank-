@@ -21,7 +21,7 @@ namespace BankSystem.API.Repositories.Service
         {
 
             var email = new TransactionalEmailBuilder()
-                .WithFrom(new SendContact("muhammadibraheem99m@gmail.com", "Muhammad Bank"))
+                .WithFrom(new SendContact("musabibrahimflaifel@gmail.com", "Mus'ab Bank"))
                 .WithSubject("Welcome to Our Bank!")
                 .WithHtmlPart($"<h3>Hello {userName},</h3><p>Thank you for registering with us. We're excited to have you on board!<br>" +
                 $"Now you are have an account bank with account number ==> {AccountNum}</p>")
@@ -45,7 +45,7 @@ namespace BankSystem.API.Repositories.Service
                 {
                     Resource = Mailjet.Client.Resources.Send.Resource,
                 }
-                .Property(Mailjet.Client.Resources.Send.FromEmail, "muhammadibraheem99m@gmail.com")
+                .Property(Mailjet.Client.Resources.Send.FromEmail, "musabibrahimflaifel@gmail.com")
                 .Property(Mailjet.Client.Resources.Send.FromName, "Events")
                 .Property(Mailjet.Client.Resources.Send.Subject, subject)
                 .Property(Mailjet.Client.Resources.Send.HtmlPart, htmlPart)
