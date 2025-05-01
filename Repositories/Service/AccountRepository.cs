@@ -4,12 +4,16 @@ using BankSystem.API.Models.Domain;
 using BankSystem.API.Models.DTO;
 using BankSystem.API.Repositories.Interface;
 using BankSystem.API.Shared;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace BankSystem.API.Repositories.Service
 {
@@ -18,8 +22,12 @@ namespace BankSystem.API.Repositories.Service
             , IEmail _Email
             , IConfiguration configuration, IUrlHelperFactory urlHelperFactory
             , IHttpContextAccessor httpContextAccessor
+            , JWTServices jWTServices
+           
             ) : IAccountRepository
+        
     {
+        private readonly string _appUrl = configuration["App:Url"];
         //public async Task<Response_RegistrationDto> RegisterUserAsync(RegisterRequestDto registerDto)
         //{
         //    string bankName = "Strive Bank";
@@ -91,7 +99,119 @@ namespace BankSystem.API.Repositories.Service
         //        Success = true,
         //    };
         //}
+        public async Task<Response_TokenDto> LoginAsync(Login_Request loginRequest)
+        {
+            var user = await userManager.FindByNameAsync(loginRequest.UserName);
 
+            if (user == null)
+            {
+                // No need to expose that the user doesn't exist
+                return new Response_TokenDto
+                {
+                    Success = false,
+                    Message = "Invalid username or password."
+                };
+            }
+
+            // Check if user is locked out
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                return new Response_TokenDto
+                {
+                    Success = false,
+                    Message = "Your account is locked. Please try again later."
+                };
+            }
+
+            if (!await userManager.CheckPasswordAsync(user, loginRequest.Password))
+            {
+                // Register a failed access attempt
+                await userManager.AccessFailedAsync(user);
+
+                return new Response_TokenDto
+                {
+                    Success = false,
+                    Message = "Invalid username or password."
+                };
+            }
+
+            // Reset failed access count on successful login
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            var isEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
+            if (!isEmailConfirmed)
+            {
+                throw new InvalidOperationException("Your email is not confirmed yet. Please confirm your email to proceed.");
+            }
+
+            var accessToken = jWTServices.GenerateJwtToken(user);
+            var refreshToken = jWTServices.GenerateRefreshToken();
+
+            await SaveRefreshTokenAsync(user.Id, refreshToken);
+
+            return new Response_TokenDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                Success = true
+            };
+        }
+
+        private async Task SaveRefreshTokenAsync(string userId, string refreshToken)
+        {
+            var existingToken = await context.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == userId);
+            if (existingToken != null)
+            {
+                existingToken.Token = refreshToken;
+                existingToken.ExpiryDate = DateTime.UtcNow.AddDays(7);
+                //existingToken.LastUpdated = DateTime.UtcNow; // إضافة وقت التحديث
+            }
+            else
+            {
+                var newToken = new RefreshToken
+                {
+                    UserId = userId,
+                    Token = refreshToken,
+                    ExpiryDate = DateTime.UtcNow.AddDays(7)
+                    //CreatedAt = DateTime.UtcNow
+                };
+                context.RefreshTokens.Add(newToken);
+            }
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Logout(ClaimsPrincipal userPrincipal)
+        {
+            var user = await userManager.GetUserAsync(userPrincipal);
+            if (user != null)
+            {
+                var userTokens = context.RefreshTokens.Where(rt => rt.UserId == user.Id);
+                context.RefreshTokens.RemoveRange(userTokens);
+                await context.SaveChangesAsync();
+            }
+        }
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordReqDto forgotPasswordDto)
+        {
+            var user = await userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            //var baseUrl = "http://localhost:5085/api/Account";
+            var resetLink = $"{_appUrl}/api/Account/reset-password?email={user.Email}&token={code}";
+            var subject = "Reset Password";
+            var emailBody = $@"
+            <p>To reset your password, please click the following link:</p>
+            <p><a href='{resetLink}'>Reset Password</a></p>";
+
+            await _Email.SendEmailAsync(user.Email, subject, emailBody, emailBody);
+
+            return true;
+        }
         public async Task<Response_RegistrationDto> RegisterUserAsync(RegisterRequestDto registerDto)
         {
             string bankName = "Strive Bank";
@@ -341,8 +461,8 @@ namespace BankSystem.API.Repositories.Service
                 Email = registerDto.Email,
                 Role = registerDto.UserRole.ToString(),
                 DateOfBirth = registerDto.DateOfBirth,
-                PersonalImage = savedFile,
-                LockoutEnd = DateTime.Now,
+                PersonalImage = savedFile
+               
             };
         }
 

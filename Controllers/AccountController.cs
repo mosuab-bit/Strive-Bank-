@@ -12,6 +12,33 @@ namespace BankSystem.API.Controllers
     [ApiController]
     public class AccountController(UserManager<ApplicationUser> userManager,JWTServices jWTServices,IAccountRepository accountRepository) : ControllerBase
     {
+        [HttpPost("Login")]
+        [ProducesResponseType(typeof(object), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(typeof(string), 423)]
+        public async Task<IActionResult> Login([FromForm] Login_Request request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result =await accountRepository.LoginAsync(request);
+            if (result.Success)
+                return Ok(new
+                {
+                    accessToken = result.AccessToken,
+                    refreshToken = result.RefreshToken
+                });
+
+            if (result.Message.Contains("locked", StringComparison.OrdinalIgnoreCase))
+                return StatusCode(423, result.Message);
+
+            return BadRequest(result.Message);
+
+
+        }
+
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromForm] RegisterRequestDto registerRequest)
         {
@@ -54,7 +81,7 @@ namespace BankSystem.API.Controllers
 
             return Ok(new
             {
-                message = "Email confirmed successfully. You can now log in.",
+                message = "Email confirmed successfully.",
                 accessToken = accessToken
             });
         }

@@ -1,4 +1,4 @@
-using BankSystem.API.Data;
+﻿using BankSystem.API.Data;
 using BankSystem.API.Helper;
 using BankSystem.API.Models.Domain;
 using BankSystem.API.Repositories.Interface;
@@ -37,6 +37,17 @@ EncryptionHelper.Initialize(builder.Configuration);
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BankSystemDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Lockout settings
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1); // مدة القفل
+    options.Lockout.MaxFailedAccessAttempts = 3; // عدد المحاولات قبل القفل
+    options.Lockout.AllowedForNewUsers = true; // تفعيل القفل للمستخدمين الجدد
+
+    // Optional: enforce unique emails, password policy, etc.
+    //options.User.RequireUniqueEmail = true;
+});
 
 // Configure JWT
 builder.Services.AddAuthentication(options =>

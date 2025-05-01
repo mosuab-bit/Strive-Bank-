@@ -11,7 +11,7 @@ namespace BankSystem.API.Data
         public BankSystemDbContext(DbContextOptions<BankSystemDbContext> options):base(options) 
         {
             
-        }
+        } 
         public DbSet<AccountType> AccountTypes { get; set;}
         public DbSet<ATM> ATMs { get; set; }
         public DbSet<Branch> Branches { get; set; }
