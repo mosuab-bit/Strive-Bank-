@@ -2,6 +2,7 @@
 using BankSystem.API.Models.DTO;
 using BankSystem.API.Repositories.Interface;
 using BankSystem.API.Repositories.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -84,6 +85,50 @@ namespace BankSystem.API.Controllers
                 message = "Email confirmed successfully.",
                 accessToken = accessToken
             });
+        }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await accountRepository.Logout(User);
+            Response.Cookies.Delete("AuthToken");
+            return Ok(new {Message = "Successfully logged out"});
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordReqDto forgotPasswordDto)
+        {
+            var result = await accountRepository.ForgotPasswordAsync(forgotPasswordDto);
+            if (!result)
+            {
+                return BadRequest("Failed to send reset email.");
+            }
+
+            return Ok("Password reset link sent.");
+        }
+
+        [HttpGet("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordDto resetPasswordDto)
+        {
+            if (resetPasswordDto.NewPassword != resetPasswordDto.ConfirmPassword)
+            {
+                return BadRequest(new { Message = "Passwords do not match" });
+            }
+
+            var user = await userManager.FindByEmailAsync(resetPasswordDto.Email);
+            if (user == null)
+            {
+                return BadRequest(new { Message = "User not found" });
+            }
+
+            // Reset the password using the resetToken
+            var result = await userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new { Message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+            }
+
+            return Ok(new { Message = "Password has been successfully reset." });
         }
     }
 }
