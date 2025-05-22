@@ -107,8 +107,8 @@ namespace BankSystem.API.Controllers
             return Ok("Password reset link sent.");
         }
 
-        [HttpGet("ResetPassword")]
-        public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordDto resetPasswordDto)
+        [HttpPost("Reset-Password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             if (resetPasswordDto.NewPassword != resetPasswordDto.ConfirmPassword)
             {

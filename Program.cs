@@ -92,6 +92,7 @@ builder.Services.AddScoped<MailjetClient>(provider =>
 builder.Services.AddHttpContextAccessor();
 // Register custom services
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
 builder.Services.AddScoped<JWTServices>();
 builder.Services.AddScoped<IEmail, EmailRepository>();
 
