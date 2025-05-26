@@ -96,6 +96,7 @@ builder.Services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
 builder.Services.AddScoped<JWTServices>();
 builder.Services.AddScoped<IEmail, EmailRepository>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
