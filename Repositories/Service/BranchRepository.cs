@@ -36,7 +36,7 @@ namespace BankSystem.API.Repositories.Service
 
         }
 
-        public async Task<Response_BranchDto?> CreateBranchAsync(Response_BranchDto branch)
+        public async Task<Response_BranchDto?> CreateBranchAsync(Request_BranchDto branch)
         {
             bool isExist = await dbContext.Branches.AnyAsync(b => b.BranchName == branch.BranchName);
 
@@ -57,6 +57,33 @@ namespace BankSystem.API.Repositories.Service
                 BranchName = newBranch.BranchName,
                 BranchLocation = newBranch.BranchLocation,
             };
+        }
+
+        public async Task<Response_BranchDto?> UpdateBranchAsync(int id, Request_BranchDto requestBranch)
+        {
+            var branch = await dbContext.Branches.FindAsync(id);
+            if (branch == null) return null;
+
+            branch.BranchName = requestBranch.BranchName;
+            branch.BranchLocation = requestBranch.BranchLocation;
+
+            await dbContext.SaveChangesAsync();
+
+            return new Response_BranchDto
+            {
+                BranchId = branch.BranchId,
+                BranchName = branch.BranchName,
+                BranchLocation = branch.BranchLocation
+            };
+        }
+
+        public async Task<bool> DeleteBranchAsync(int id)
+        {
+            var branch = await dbContext.Branches.FindAsync(id);
+            if (branch == null) return false;
+            dbContext.Branches.Remove(branch);
+            await dbContext.SaveChangesAsync();
+            return true;
         }
 
     }

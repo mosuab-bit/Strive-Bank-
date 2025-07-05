@@ -14,6 +14,6 @@
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public int CustomerAccountId { get; set; }
-        public required CustomerAccount CustomerAccount { get; set; }
+        public  CustomerAccount CustomerAccount { get; set; }
     }
 }

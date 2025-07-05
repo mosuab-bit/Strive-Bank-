@@ -1,5 +1,6 @@
 ﻿using BankSystem.API.Data;
 using BankSystem.API.Helper;
+using BankSystem.API.Middlewares;
 using BankSystem.API.Models.Domain;
 using BankSystem.API.Repositories.Interface;
 using BankSystem.API.Repositories.Service;
@@ -95,6 +96,7 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
 builder.Services.AddScoped<JWTServices>();
 builder.Services.AddScoped<IEmail, EmailRepository>();
+builder.Services.AddScoped<IBranch,BranchRepository>();
 
 
 var app = builder.Build();
@@ -105,6 +107,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
