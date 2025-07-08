@@ -61,5 +61,18 @@ namespace BankSystem.API.Controllers
 
             return Ok(cards);
         }
+
+        [HttpGet("{CreditCardId}")]
+        [Authorize(Roles = "SystemAdministrator,CreditCardOfficer,Teller,Customer")]
+        public async Task<IActionResult> GetCreditCardById(int CreditCardId)
+        {
+            var creditCard = await creditCardService.GetCreditCardByIdAsync(CreditCardId);
+
+            if (creditCard is null)
+                return NotFound($"Credit card with ID {CreditCardId} was not found.");
+
+            return Ok(creditCard);
+        }
+
     }
 }

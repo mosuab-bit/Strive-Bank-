@@ -80,27 +80,21 @@ namespace BankSystem.API.Repositories.Service
 
         public async Task<Response_GetCreditCardInfoDto?> GetCreditCardByIdAsync(int CreditCardId)
         {
-            var creditCard = await context.CreditCards
-           .Where(c=> c.CreditCardId==CreditCardId && !c.IsDeleted)
-           .Include(u => u.CustomerAccount)
-           .ThenInclude(u => u.User)
-           .Select(c => new Response_GetCreditCardInfoDto
-           {
-               CreditCardId = c.CreditCardId,
-               CardHolderName = c.CustomerAccount.User.FullName,
-               CardType = c.CardType,
-               CreditLimit = c.CreditLimit,
-               Balance = c.CustomerAccount.Balance,
-               ExpiryDate = c.ExpiryDate,
-               Status = c.Status,
-               CreatedAt = c.CreatedAt
-           })
-           .FirstOrDefaultAsync();
+            return await context.CreditCards
+         .Where(c => c.CreditCardId == CreditCardId && !c.IsDeleted)
+         .Select(c => new Response_GetCreditCardInfoDto
+         {
+             CreditCardId = c.CreditCardId,
+             CardHolderName = c.CustomerAccount.User.FullName,
+             CardType = c.CardType,
+             CreditLimit = c.CreditLimit,
+             Balance = c.CustomerAccount.Balance,
+             ExpiryDate = c.ExpiryDate,
+             Status = c.Status,
+             CreatedAt = c.CreatedAt
+         })
+         .FirstOrDefaultAsync();
 
-            if(creditCard == null) return null;
-
-            return creditCard;
-            
         }
 
         public async Task UpdateCreditCardAsync(int CreditCardId,string userId, Request_UserUpdateCreditCardDto request_UserUpdateCreditCard)
