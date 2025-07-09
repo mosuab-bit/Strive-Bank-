@@ -11,7 +11,7 @@ namespace BankSystem.API.Shared
         [EnumMember(Value = "BranchManager")]
         BranchManager,
         [EnumMember(Value = "Admin")]
-        SystemAdministrator,
+        Admin,
         [EnumMember(Value = "LoanOfficer")]
         LoanOfficer,
         [EnumMember(Value = "CreditCardOfficer")]

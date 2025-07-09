@@ -24,6 +24,11 @@ namespace BankSystem.API.Config
                    .WithOne(e => e.BranchEmployee)  
                    .HasForeignKey(e => e.BranchId) 
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasData(
+                new Branch { BranchId = 1, BranchLocation = "middle Towmn ", BranchName = "MainBranch" },
+                new Branch { BranchId = 2, BranchLocation = "middle Towmn ", BranchName = "WestBranch" },
+                new Branch { BranchId = 3, BranchLocation = "middle Towmn ", BranchName = "EastBranch" });
         }
     }
 }

@@ -13,11 +13,11 @@ namespace BankSystem.API.Controllers
     public class CreditCardController (ICreditCard creditCardService) : ControllerBase
     {
         [HttpPost]
-        [Authorize(Roles = "SystemAdministrator,CreditCardOfficer,Teller")]
+        [Authorize(Roles = "Admin,CreditCardOfficer,Teller")]
         public async Task<IActionResult> CreateCreditCard(Request_CreditCardDto creditCardDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            //if (!ModelState.IsValid)
+            //    return BadRequest(ModelState);
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -30,8 +30,8 @@ namespace BankSystem.API.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateCreditCardById(int CreditCardId, [FromBody] Request_UserUpdateCreditCardDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            //if (!ModelState.IsValid)
+            //    return BadRequest(ModelState);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -44,8 +44,7 @@ namespace BankSystem.API.Controllers
         [Authorize(Roles = "Admin,Teller,CreditCardOfficer")]
         public async Task<IActionResult> UpdateCreditCardByAdmin(int CreditCardId, [FromBody] Request_UpdateCreditCardByAdminDto updateCreditCardByAdminDto)
         {
-            if(!ModelState.IsValid)
-                return BadRequest(ModelState);
+            
 
             await creditCardService.UpdateCreditCardByAdminAsync(CreditCardId, updateCreditCardByAdminDto);
 
@@ -54,7 +53,7 @@ namespace BankSystem.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "SystemAdministrator,CreditCardOfficer,Teller")]
+        [Authorize(Roles = "Admin,CreditCardOfficer,Teller")]
         public async Task<IActionResult> GetAllCreditCards([FromQuery] bool IncludeDeleted = false)
         {
             var cards = await creditCardService.GetAllCreditCardAsync(IncludeDeleted);
@@ -63,7 +62,7 @@ namespace BankSystem.API.Controllers
         }
 
         [HttpGet("{CreditCardId}")]
-        [Authorize(Roles = "SystemAdministrator,CreditCardOfficer,Teller,Customer")]
+        [Authorize(Roles = "Admin,CreditCardOfficer,Teller,Customer")]
         public async Task<IActionResult> GetCreditCardById(int CreditCardId)
         {
             var creditCard = await creditCardService.GetCreditCardByIdAsync(CreditCardId);
@@ -74,5 +73,12 @@ namespace BankSystem.API.Controllers
             return Ok(creditCard);
         }
 
+        [HttpDelete("{CreditCardId}")]
+        [Authorize(Roles = "Admin,CreditCardOfficer")]
+        public async Task<IActionResult> DeleteCreditCard(int CreditCardId)
+        {
+            await creditCardService.DeleteCreditCardAsync(CreditCardId);
+            return NoContent();
+        }
     }
 }
