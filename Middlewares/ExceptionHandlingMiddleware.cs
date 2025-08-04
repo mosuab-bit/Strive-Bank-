@@ -28,6 +28,7 @@ namespace BankSystem.API.Middlewares
         {
             var code = ex switch
             {
+                
                 KeyNotFoundException => HttpStatusCode.NotFound,              // 404
                 UnauthorizedAccessException => HttpStatusCode.Forbidden,     // 403
                 ArgumentException => HttpStatusCode.BadRequest,              // 400

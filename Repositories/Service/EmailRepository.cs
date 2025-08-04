@@ -17,7 +17,7 @@ public class EmailRepository : IEmail
     public async Task SendRegistrationEmailAsync(string recipientEmail, string userName, string accountNum)
     {
         var email = new TransactionalEmailBuilder()
-            .WithFrom(new SendContact("musabibrahimflaifel@gmail.com", "Mus'ab Bank"))
+            .WithFrom(new SendContact("majdibrahemflaifle@gmail.com", "Mus'ab Bank"))
             .WithSubject("Welcome to Our Bank!")
             .WithHtmlPart($"<h3>Hello {userName},</h3><p>Thank you for registering!<br>Your account number is: <strong>{accountNum}</strong></p>")
             .WithTo(new SendContact(recipientEmail))
@@ -39,7 +39,7 @@ public class EmailRepository : IEmail
             {
                 Resource = Mailjet.Client.Resources.Send.Resource,
             }
-            .Property(Mailjet.Client.Resources.Send.FromEmail, "musabibrahimflaifel@gmail.com")
+            .Property(Mailjet.Client.Resources.Send.FromEmail, "majdibrahemflaifle@gmail.com")
             .Property(Mailjet.Client.Resources.Send.FromName, "Events")
             .Property(Mailjet.Client.Resources.Send.Subject, subject)
             .Property(Mailjet.Client.Resources.Send.HtmlPart, htmlPart)

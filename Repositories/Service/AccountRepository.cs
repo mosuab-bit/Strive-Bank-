@@ -113,7 +113,7 @@ namespace BankSystem.API.Repositories.Service
                 };
             }
 
-            // Check if user is locked out
+            //Check if user is locked out
             if (await userManager.IsLockedOutAsync(user))
             {
                 return new Response_TokenDto
@@ -138,11 +138,11 @@ namespace BankSystem.API.Repositories.Service
             // Reset failed access count on successful login
             await userManager.ResetAccessFailedCountAsync(user);
 
-            var isEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
-            if (!isEmailConfirmed)
-            {
-                throw new InvalidOperationException("Your email is not confirmed yet. Please confirm your email to proceed.");
-            }
+            //var isEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
+            //if (!isEmailConfirmed)
+            //{
+            //    throw new InvalidOperationException("Your email is not confirmed yet. Please confirm your email to proceed.");
+            //}
 
             var accessToken = jWTServices.GenerateJwtToken(user);
             var refreshToken = jWTServices.GenerateRefreshToken();

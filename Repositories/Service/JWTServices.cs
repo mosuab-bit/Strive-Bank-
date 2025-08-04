@@ -53,7 +53,7 @@ namespace BankSystem.API.Repositories.Service
                 issuer: configuration["Jwt:Issuer"],
                 audience: configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(configuration["Jwt:ExpireDurationInMinutes"])),
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(configuration["Jwt:AccessTokenExpirationMinutes"])),
                 signingCredentials: creds
             );
 
