@@ -1,4 +1,5 @@
-﻿using BankSystem.API.Data;
+﻿using Azure.Core;
+using BankSystem.API.Data;
 using BankSystem.API.Helper;
 using BankSystem.API.Models.Domain;
 using BankSystem.API.Models.DTO;
@@ -9,6 +10,33 @@ namespace BankSystem.API.Repositories.Service
 {
     public class CustomerAccountRepository(BankSystemDbContext context) : ICustomerInterface
     {
+        public async Task<bool> DeleteCustomerAccountAsync(int customerAccountID)
+        {
+            var customerAccount = await context.CustomerAccounts.Include(ca => ca.User)
+                .FirstOrDefaultAsync(ca => ca.CustomerAccountId == customerAccountID);
+
+            if (customerAccount == null)
+            {
+                throw new KeyNotFoundException($"Customer account not found for CustomerAccount ID: {customerAccountID}");
+            }
+
+
+            customerAccount.IsDeleted = true;
+
+            var user = customerAccount.User;
+            if (user != null)
+            {
+                user.IsDeleted = true;
+            }
+
+            await context.SaveChangesAsync();
+
+            return true;
+        }
+        
+
+
+
         public async Task<Response_CustomerAccount> GetAccountInfoByAccountNum(string AccountNum)
         {
            var CustomerAccount = await context.CustomerAccounts
@@ -18,22 +46,24 @@ namespace BankSystem.API.Repositories.Service
 
             if (CustomerAccount == null)
                 throw new KeyNotFoundException("This Account Number Is Not Exist");
-            
+
             var AccountInfo = new Response_CustomerAccount
             {
-                FullName = customerAccounts.User.FullName,
-                Email = customerAccounts.User.Email,
-                Phone = customerAccounts.User.PhoneNumber,
-                Address = customerAccounts.User.Address,
-                UserRole = customerAccounts.User.Role.ToString(),
-                IsDeleted = customerAccounts.User.IsDeleted,
-                Gender = customerAccounts.User.Gender,
-                AccountTypeName = customerAccounts.AccountType.AccountTypeName,
-                CreatedDate = customerAccounts.CreatedDate,
-                AccountNumber = Base64Helper.Decode(customerAccounts.AccountNumber),
-                Balance = customerAccounts.Balance,
-                PersonalImage = customerAccounts.User.PersonalImage
-            } 
+                FullName = CustomerAccount.User.FullName,
+                Email = CustomerAccount.User.Email,
+                Phone = CustomerAccount.User.PhoneNumber,
+                Address = CustomerAccount.User.Address,
+                UserRole = CustomerAccount.User.Role.ToString(),
+                IsDeleted = CustomerAccount.User.IsDeleted,
+                Gender = CustomerAccount.User.Gender,
+                AccountTypeName = CustomerAccount.AccountType.AccountTypeName,
+                CreatedDate = CustomerAccount.CreatedDate,
+
+                Balance = CustomerAccount.Balance,
+                PersonalImage = CustomerAccount.User.PersonalImage
+            };
+
+            return AccountInfo;
         }
 
         public async Task<Response_UpdateAccTypeInCustomerAccDto> GetAccountTypeByCustomerAccountIdAsync(int CustomerAccountId)
@@ -140,6 +170,30 @@ namespace BankSystem.API.Repositories.Service
                 AccountNumber = $"New account number is **** **** {last4Digits}",
                 Message = "Account type has been successfully updated."
             };
+        }
+
+        public async Task<bool> UpdateCustomerInfoAsync(Request_UpdateCustomerInfoDto request_UpdateCustomerInfoDto, int CustomerAccountId)
+        {
+            var customerAccount = await context.CustomerAccounts.Include(u => u.User)
+                .FirstOrDefaultAsync(ca => ca.CustomerAccountId == CustomerAccountId);
+
+            if (customerAccount == null)
+                throw new KeyNotFoundException("Customer Account is Not Exist");
+            if (customerAccount.User == null)
+                throw new Exception("User not found for the customer account.");
+            
+            customerAccount.User.PhoneNumber = request_UpdateCustomerInfoDto.PhoneNumber;
+            customerAccount.User.Email = request_UpdateCustomerInfoDto.Email;
+            customerAccount.User.UserName = request_UpdateCustomerInfoDto.UserName;
+            customerAccount.User.Address = request_UpdateCustomerInfoDto.Address;
+
+            if (!string.IsNullOrEmpty(request_UpdateCustomerInfoDto.ImageUrl))
+            customerAccount.User.PersonalImage = request_UpdateCustomerInfoDto.ImageUrl;
+            
+
+            await context.SaveChangesAsync();
+
+            return true;
         }
 
 
