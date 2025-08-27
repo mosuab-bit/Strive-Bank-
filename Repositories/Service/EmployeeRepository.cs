@@ -9,6 +9,48 @@ namespace BankSystem.API.Repositories.Service
 {
     public class EmployeeRepository(BankSystemDbContext context, UserManager<ApplicationUser> userManager) : IEmployeeRepository
     {
+        public async Task<bool> DeleteEmployeeAsyunc(string userId)
+        {
+            var employee = await context.Employees
+                     .Include(e => e.User)
+                     .FirstOrDefaultAsync(e => e.UserId == userId);
+
+            if (employee == null)
+                throw new KeyNotFoundException($"Employee with UserId {userId} does not exist.");
+
+            if (employee.User == null)
+                throw new KeyNotFoundException($"User with UserId {userId} does not exist.");
+
+            employee.IsDeleted = true;
+            employee.User.IsDeleted = true;
+
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<Response_EmployeeDto>> GetAllEmployeeInfoByUserNameAsync(bool includeDeleted)
+        {
+            var employeeDtos = await context.Employees
+                     .Where(e => includeDeleted ? e.IsDeleted : !e.IsDeleted)
+                     .Select(employee => new Response_EmployeeDto
+                     {
+                     FullName = employee.User.FullName,
+                     Email = employee.User.Email,
+                     PhoneNumber = employee.User.PhoneNumber,
+                     Address = employee.User.Address,
+                     Position = employee.User.Role.ToString(),
+                     Salary = employee.EmployeeSalary,
+                     HireDate = employee.HireDate,
+                     PersonalImage = employee.User.PersonalImage,
+                     BranchName = employee.BranchEmployee != null ? employee.BranchEmployee.BranchName : null,
+                     BranchLocation = employee.BranchEmployee != null ? employee.BranchEmployee.BranchLocation : null
+                     })
+                     .ToListAsync();
+
+            return employeeDtos;
+
+        }
+
         public async Task<Response_EmployeeDto> GetEmployeeInfoByUserNameAsync(string userName)
         {
             var employee = await context.Employees.Include(e=>e.User)
@@ -96,5 +138,6 @@ namespace BankSystem.API.Repositories.Service
 
             return true;
         }
+       
     }
 }

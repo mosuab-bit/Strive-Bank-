@@ -6,5 +6,7 @@ namespace BankSystem.API.Repositories.Interface
     {
         Task<Response_EmployeeDto> GetEmployeeInfoByUserNameAsync(string userName);
         Task<bool> UpdateEmployeeInfoByUserNameAsync(string username, Request_UpdateEmployeeInfoDto Dto);
+        Task<List<Response_EmployeeDto>> GetAllEmployeeInfoByUserNameAsync(bool IncludedDeleted);
+        Task<bool> DeleteEmployeeAsyunc(string userId);
     }
 }
