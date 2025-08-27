@@ -80,6 +80,21 @@ namespace BankSystem.API.Repositories.Service
             var employee = await context.Employees.Include(e => e.User)
                  .Include(e => e.BranchEmployee)
                  .FirstOrDefaultAsync(e => e.User.UserName == username);
+
+            if (employee == null)
+                throw new KeyNotFoundException("Employee not found.");
+
+            employee.User.Email = Dto.Email;
+            employee.User.PhoneNumber = Dto.PhoneNumber;
+            employee.User.Address = Dto.Address;
+            if(Dto.ImageUrl!=null && Dto.ImageUrl.Length!=0)
+            employee.User.PersonalImage = await SaveImageAsync(Dto.ImageUrl);
+            employee.User.UserName = Dto.UserName;
+
+            context.Employees.Update(employee);
+            await context.SaveChangesAsync();
+
+            return true;
         }
     }
 }
