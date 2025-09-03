@@ -117,6 +117,25 @@ namespace BankSystem.API.Repositories.Service
             return fileName; // ✅ إرجاع اسم الملف المحفوظ
         }
 
+        public async Task<bool> UpdateEmployeeByEmployeeId(int employeeId, Request_UpdateEmployeeInfoByAdminDto dto)
+        {
+            var employee = await context.Employees
+                .Include(e => e.User)
+                .Include(e => e.BranchEmployee)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+            if (employee == null)
+                throw new KeyNotFoundException("Employee is not exist");
+
+            employee.User.Role = dto.UserRole.ToString();
+            employee.EmployeeSalary = dto.Salary;
+            employee.BranchId = (int)dto.BranchName;
+            employee.IsDeleted = dto.IsDeleted;
+
+            await context.SaveChangesAsync();
+            
+            return true;
+        }
+
         public async Task<bool> UpdateEmployeeInfoByUserNameAsync(string username, Request_UpdateEmployeeInfoDto Dto)
         {
             var employee = await context.Employees.Include(e => e.User)

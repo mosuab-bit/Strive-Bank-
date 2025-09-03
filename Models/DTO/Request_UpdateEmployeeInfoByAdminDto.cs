@@ -12,8 +12,8 @@ namespace BankSystem.API.Models.DTO
         [Range(0, int.MaxValue, ErrorMessage = "Salary must be a positive number.")]
         public int? Salary { get; set; }        
 
-        public Branches? Branch { get; set; }   
-
+        public Branches? BranchName { get; set; }   
+        
         public bool IsDeleted { get; set; }
     }
 }
