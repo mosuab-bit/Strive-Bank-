@@ -9,7 +9,7 @@ namespace BankSystem.API.Repositories.Service
 {
     public class EmployeeRepository(BankSystemDbContext context, UserManager<ApplicationUser> userManager) : IEmployeeRepository
     {
-        public async Task<bool> DeleteEmployeeAsyunc(string userId)
+        public async Task<bool> DeleteEmployeeAsync(string userId)
         {
             var employee = await context.Employees
                      .Include(e => e.User)
@@ -28,7 +28,7 @@ namespace BankSystem.API.Repositories.Service
             return true;
         }
 
-        public async Task<List<Response_EmployeeDto>> GetAllEmployeeInfoByUserNameAsync(bool includeDeleted)
+        public async Task<List<Response_EmployeeDto>> GetAllEmployeeAsync(bool includeDeleted)
         {
             var employeeDtos = await context.Employees
                      .Where(e => includeDeleted ? e.IsDeleted : !e.IsDeleted)
@@ -117,7 +117,7 @@ namespace BankSystem.API.Repositories.Service
             return fileName; // ✅ إرجاع اسم الملف المحفوظ
         }
 
-        public async Task<bool> UpdateEmployeeByEmployeeId(int employeeId, Request_UpdateEmployeeInfoByAdminDto dto)
+        public async Task<bool> UpdateEmployeeByEmployeeIdAsync(int employeeId, Request_UpdateEmployeeInfoByAdminDto dto)
         {
             var employee = await context.Employees
                 .Include(e => e.User)

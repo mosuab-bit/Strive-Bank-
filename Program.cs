@@ -126,6 +126,8 @@ builder.Services.AddScoped<IEmail, EmailRepository>();
 builder.Services.AddScoped<IBranch,BranchRepository>();
 builder.Services.AddScoped<ICreditCard, CreditCardRepository>();
 builder.Services.AddScoped<ICustomerInterface, CustomerAccountRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
 
 
 
